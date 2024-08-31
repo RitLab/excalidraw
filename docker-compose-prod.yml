@@ -8,12 +8,22 @@ services:
       target: production
     container_name: excalidraw
     ports:
-      - "5010:80"
+      - "5010:8080"
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=lms-traefik"
+      - "traefik.http.routers.excalidraw.rule=Host(`whiteboard.ritlab.biz.id`)"
+      - "traefik.http.services.excalidraw.loadbalancer.server.port=8080"
+      - "traefik.http.routers.excalidraw.entrypoints=websecure"
+      - "traefik.http.routers.excalidraw.tls.certresolver=myresolver"
     healthcheck:
       disable: true
     environment:
       - NODE_ENV=production
+    networks:
+      - lms-traefik
+      - lms-whiteboard
 
   excalidraw-storage-backend:
     build:
@@ -22,14 +32,34 @@ services:
     ports:
       - "5011:8080"
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=lms-traefik"
+      - "traefik.http.routers.excalidraw-storage-backend.rule=Host(`whiteboard-backend.ritlab.biz.id`) && PathPrefix(`/api/v2`)"
+      - "traefik.http.services.excalidraw-storage-backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.excalidraw-storage-backend.entrypoints=websecure"
+      - "traefik.http.routers.excalidraw-storage-backend.tls.certresolver=myresolver"
     environment:
-      STORAGE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-excalidraw-prod}
+      STORAGE_URI: postgresql://${POSTGRES_USER:-excalidraw}:${POSTGRES_PASSWORD:-excalidraw}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-excalidraw-prod}
+    networks:
+      - lms-traefik
+      - lms-whiteboard
 
   excalidraw-room:
     image: excalidraw/excalidraw-room
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=lms-traefik"
+      - "traefik.http.routers.excalidraw-room.rule=Host(`whiteboard-backend.ritlab.biz.id`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.services.excalidraw-room.loadbalancer.server.port=80"
+      - "traefik.http.routers.excalidraw-room.entrypoints=websecure"
+      - "traefik.http.routers.excalidraw-room.tls.certresolver=myresolver"
     ports:
       - "5012:80"
+    networks:
+      - lms-traefik
+      - lms-whiteboard
 
   postgres:
     image: postgres:15-alpine
@@ -39,14 +69,21 @@ services:
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_DB: ${POSTGRES_DB:-excalidraw-prod}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-excalidraw}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_USER: ${POSTGRES_USER:-excalidraw}
     volumes:
-      - postgres_data:/var/lib/postgresql/data/pgdata
+      - /var/local/pgdata-whiteboard:/var/lib/postgresql/data/pgdata
     #ports:
     #  - "5432:5432"
 
+networks:
+  lms-traefik:
+    external: true
+    name: lms-traefik
+  lms-whiteboard:
+    external: true
+    name: lms-whiteboard
+
 volumes:
-  notused:
   postgres_data:
