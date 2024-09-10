@@ -211,12 +211,12 @@ const initializeScene = async (opts: {
 
   let roomLinkData = getCollaborationLinkData(window.location.href);
   if (!roomLinkData) {
-    const {roomId, roomKey} = await generateCollaborationLinkData();
+    const { roomId, roomKey } = await generateCollaborationLinkData();
     roomLinkData = getCollaborationLinkData(
-      getCollaborationLink({ roomId, roomKey })
+      getCollaborationLink({ roomId, roomKey }),
     );
-
   }
+
   const isExternalScene = !!(id || jsonBackendMatch || roomLinkData);
   if (isExternalScene) {
     if (
