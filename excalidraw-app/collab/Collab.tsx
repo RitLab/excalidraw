@@ -655,7 +655,7 @@ class Collab extends PureComponent<CollabProps, CollabState> {
     );
 
     this.initializeIdleDetector();
-
+    window.location.replace(getCollaborationLink({ roomId, roomKey }))
     this.setActiveRoomLink(window.location.href);
 
     return scenePromise;

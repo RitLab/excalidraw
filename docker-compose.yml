@@ -19,15 +19,13 @@ services:
       - ./:/opt/node_app/
 
   excalidraw-storage-backend:
-    build:
-      context: https://github.com/kitsteam/excalidraw-storage-backend.git#main
-      target: production
+    image: kiliandeca/excalidraw-storage-backend:latest
     stdin_open: true
     container_name: excalidraw-storage-backend
     ports:
       - "8080:8080"
     environment:
-      STORAGE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-excalidraw-dev}
+      STORAGE_URI: postgresql://${POSTGRES_USER:-excalidraw}:${POSTGRES_PASSWORD:-excalidraw}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-excalidraw-dev}
 
   excalidraw-room:
     image: excalidraw/excalidraw-room
@@ -43,9 +41,9 @@ services:
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_DB: ${POSTGRES_DB:-excalidraw-dev}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-excalidraw}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_USER: ${POSTGRES_USER:-excalidraw}
     volumes:
       - postgres_data:/var/lib/postgresql/data/pgdata
     container_name: excalidraw-postgres

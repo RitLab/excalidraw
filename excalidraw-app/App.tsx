@@ -58,6 +58,8 @@ import Collab, {
 } from "./collab/Collab";
 import {
   exportToBackend,
+  generateCollaborationLinkData,
+  getCollaborationLink,
   getCollaborationLinkData,
   isCollaborationLink,
   loadScene,
@@ -208,6 +210,13 @@ const initializeScene = async (opts: {
   } = await loadScene(null, null, localDataState);
 
   let roomLinkData = getCollaborationLinkData(window.location.href);
+  if (!roomLinkData) {
+    const {roomId, roomKey} = await generateCollaborationLinkData();
+    roomLinkData = getCollaborationLinkData(
+      getCollaborationLink({ roomId, roomKey })
+    );
+
+  }
   const isExternalScene = !!(id || jsonBackendMatch || roomLinkData);
   if (isExternalScene) {
     if (

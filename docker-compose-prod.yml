@@ -26,9 +26,8 @@ services:
       - lms-whiteboard
 
   excalidraw-storage-backend:
-    build:
-      context: https://github.com/kitsteam/excalidraw-storage-backend.git#main
-      target: production
+    image: kiliandeca/excalidraw-storage-backend:latest
+    stdin_open: true
     ports:
       - "5011:8080"
     restart: always
